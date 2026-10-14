@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Retorno de la automatización del ordeño | Datavet</title>
+<meta name="description" content="¿Vale la pena automatizar el ordeño de su finca? Calcule en cuánto tiempo recupera la inversión, el valor presente neto y la TIR, y descargue el análisis en PDF o Excel. Herramienta gratuita de Datavet.">
+<meta name="author" content="Iván Darío Cifuentes Moreno · Datavet">
+<meta name="theme-color" content="#07193F">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_CO">
+<meta property="og:site_name" content="Datavet">
+<meta property="og:title" content="Retorno de la automatización del ordeño | Datavet">
+<meta property="og:description" content="¿En cuánto tiempo se paga automatizar el ordeño? Calcúlelo en 3 pasos y descargue el análisis en PDF o Excel.">
+<meta property="og:image" content="https://idacimo.github.io/Roi-automatizacion/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" sizes="48x48" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-mode="simple">
+<a class="skip" href="#contenido">Ir al contenido</a>
+
+<header class="top">
+  <img class="mark" src="assets/logo-datavet-negativo.png" alt="Datavet" width="520" height="176">
+  <div class="top-title">
+    <h1>Retorno de la automatización del ordeño</h1>
+    <p>¿En cuánto tiempo se paga automatizar el ordeño de su finca?</p>
+  </div>
+  <div class="modes" role="group" aria-label="Tipo de análisis">
+    <button type="button" data-mode="simple" aria-pressed="true">Rápido</button>
+    <button type="button" data-mode="full" aria-pressed="false">Completo</button>
+  </div>
+</header>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ===================== MODO RÁPIDO ===================== -->
+<main id="contenido" class="simple" data-view="simple">
+  <ol class="steps" aria-label="Pasos">
+    <li data-step="1" aria-current="step"><span>1</span>Su finca</li>
+    <li data-step="2"><span>2</span>El equipo</li>
+    <li data-step="3"><span>3</span>Resultados</li>
+  </ol>
+
+  <!-- Paso 1 -->
+  <section class="step" data-step="1">
+    <h2 class="step-h">Su finca hoy</h2>
+    <div class="card">
+      <label class="q" for="s-finca">Nombre de la finca <small>(opcional)</small></label>
+      <input class="txt" id="s-finca" data-bind="finca" autocomplete="off" placeholder="Ej. La Esperanza">
+      <p class="hint" style="margin:8px 0 0">Solo aparece en su PDF y su Excel. No sale de su celular.</p>
+    </div>
+    <div class="card">
+      <label class="q" for="s-vacas">¿Cuántas vacas ordeña, en promedio?</label>
+      <div class="stepper" data-k="vacas" data-step="5" data-min="1" data-max="20000">
+        <button type="button" class="minus" aria-label="Restar">−</button>
+        <input id="s-vacas" inputmode="numeric" autocomplete="off">
+        <button type="button" class="plus" aria-label="Sumar">+</button>
+        <span class="unit">vacas</span>
+      </div>
+    </div>
+    <div class="card">
+      <label class="q" for="s-lts">¿Cuántos litros da cada vaca al día?</label>
+      <div class="stepper" data-k="lts" data-step="0.5" data-min="1" data-max="80">
+        <button type="button" class="minus" aria-label="Restar">−</button>
+        <input id="s-lts" inputmode="decimal" autocomplete="off">
+        <button type="button" class="plus" aria-label="Sumar">+</button>
+        <span class="unit">litros</span>
+      </div>
+    </div>
+    <div class="card">
+      <label class="q" for="s-precio">¿A cómo le pagan el litro?</label>
+      <div class="stepper" data-k="precio" data-step="50" data-min="100" data-max="20000">
+        <button type="button" class="minus" aria-label="Restar">−</button>
+        <input id="s-precio" inputmode="numeric" autocomplete="off">
+        <button type="button" class="plus" aria-label="Sumar">+</button>
+        <span class="unit">$ / litro</span>
+      </div>
+    </div>
+    <div class="card">
+      <label class="q" for="s-horas">¿Cuántas horas dura el ordeño al día?</label>
+      <p class="hint">Sumando todos los ordeños del día.</p>
+      <div class="stepper" data-k="horas" data-step="0.5" data-min="0.5" data-max="24">
+        <button type="button" class="minus" aria-label="Restar">−</button>
+        <input id="s-horas" inputmode="decimal" autocomplete="off">
+        <button type="button" class="plus" aria-label="Sumar">+</button>
+        <span class="unit">horas</span>
+      </div>
+    </div>
+    <div class="card">
+      <label class="q" for="s-ord">¿Cuántos ordeñadores tiene?</label>
+      <div class="stepper" data-k="ord" data-step="1" data-min="0" data-max="100">
+        <button type="button" class="minus" aria-label="Restar">−</button>
+        <input id="s-ord" inputmode="numeric" autocomplete="off">
+        <button type="button" class="plus" aria-label="Sumar">+</button>
+        <span class="unit">personas</span>
+      </div>
+    </div>
+    <div class="nav"><button type="button" class="btn big" data-go="2">Siguiente</button></div>
+  </section>
+
+  <!-- Paso 2 -->
+  <section class="step" data-step="2" hidden>
+    <h2 class="step-h">¿Qué quiere automatizar?</h2>
+    <p class="hint-top">Al elegir, la calculadora pone beneficios típicos para ese nivel. En el análisis completo puede ajustarlos.</p>
+    <div class="card">
+      <span class="q" id="q-nivel">Nivel de automatización</span>
+      <div class="levels" role="radiogroup" aria-labelledby="q-nivel" id="s-nivel"></div>
+    </div>
+    <div class="card">
+      <label class="q" for="s-inv">¿Cuánto cuesta el equipo, instalado?</label>
+      <p class="hint">Escriba el valor de la cotización. Si no la tiene, deje el valor típico del nivel.</p>
+      <div class="money-in">
+        <input id="s-inv" inputmode="numeric" autocomplete="off" aria-describedby="s-inv-u">
+        <span class="unit" id="s-inv-u">millones de pesos</span>
+      </div>
+    </div>
+    <div class="errs" id="s-errs"></div>
+    <div class="nav">
+      <button type="button" class="btn ghost big" data-go="1">Atrás</button>
+      <button type="button" class="btn big" data-go="3">Ver resultados</button>
+    </div>
+  </section>
+
+  <!-- Paso 3 -->
+  <section class="step" data-step="3" hidden>
+    <div id="s-result"></div>
+    <div class="dl">
+      <button type="button" class="btn big" data-action="pdf">Descargar PDF</button>
+      <button type="button" class="btn big alt" data-action="xlsx">Descargar Excel</button>
+      <button type="button" class="btn big ghost share" data-action="share" hidden>Compartir el PDF (WhatsApp, correo…)</button>
+    </div>
+    <div class="nav">
+      <button type="button" class="btn ghost big" data-go="2">Cambiar datos</button>
+      <button type="button" class="btn ghost big" data-mode-go="full">Ver análisis completo</button>
+    </div>
+  </section>
+
+  <p class="disclaimer">Herramienta de apoyo a la decisión. Valide los beneficios con su asesor técnico y la cotización del proveedor.</p>
+</main>
+
+<!-- ===================== MODO COMPLETO ===================== -->
+<div class="full" data-view="full" hidden>
+  <div class="full-bar">
+    <label>Finca<input id="finca" data-bind="finca" autocomplete="off" placeholder="Nombre de la finca"></label>
+    <label>Fecha<input id="fecha" type="date"></label>
+    <label>Nivel de automatización<select id="nivel" class="sel"></select></label>
+    <div class="actions">
+      <button class="btn ghost" id="reset" type="button">Restablecer ejemplo</button>
+      <button class="btn ghost" type="button" data-action="print">Imprimir</button>
+      <button class="btn alt" type="button" data-action="xlsx">Descargar Excel</button>
+      <button class="btn" type="button" data-action="pdf">Descargar PDF</button>
+    </div>
+  </div>
+
+  <div class="layout">
+  <aside aria-label="Parámetros">
+    <table class="params" id="params">
+      <caption class="sr">Parámetros del análisis</caption>
+      <tbody></tbody>
+    </table>
+    <p class="aside-note">Puede escribir los números con punto de miles y coma decimal (80.000.000 o 3,5). Los porcentajes van como número: 12 es 12 %. Al cambiar el nivel de automatización se cargan la inversión y los beneficios típicos de ese nivel.</p>
+  </aside>
+
+  <section class="report" aria-label="Resultados">
+    <div class="print-head" aria-hidden="true">
+      <img src="assets/logo-datavet.png" alt="" width="640" height="159">
+      <div><b>Retorno de la automatización del ordeño</b><span id="printMeta"></span></div>
+    </div>
+
+    <p class="lead" id="lead"></p>
+    <p class="sub" id="sub"></p>
+    <div id="errors"></div>
+    <div class="kgrid" id="kgrid"></div>
+
+    <section class="block">
+      <h2>¿Para quién es cada indicador?</h2>
+      <div class="who">
+        <div><b>Productor</b>Años para recuperar la inversión y cuánto deja al año, también por litro de leche.</div>
+        <div><b>Técnico o asesor</b>De dónde sale cada peso: producción, mastitis, concentrado, mano de obra y energía.</div>
+        <div><b>Propietario</b>Flujo de caja año por año, con y sin crédito.</div>
+        <div><b>Financiero</b>Valor presente neto, TIR, recuperación descontada, escenarios y sensibilidad.</div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>¿De dónde sale el beneficio?</h2>
+      <div class="bars" id="bars"></div>
+      <p class="note">Beneficio de cada año frente a no automatizar. El mantenimiento se descuenta todos los años.</p>
+    </section>
+
+    <section class="block">
+      <h2>Flujo de caja acumulado</h2>
+      <div class="chart" id="chart"></div>
+      <p class="note">Cuando la línea cruza el cero, la inversión ya se pagó. La línea punteada descuenta el valor del dinero en el tiempo (tasa de descuento).</p>
+    </section>
+
+    <section class="block">
+      <h2>Escenarios: ¿y si los beneficios no son los esperados?</h2>
+      <div class="tbl-wrap"><table class="data" id="scen"></table></div>
+    </section>
+
+    <section class="block">
+      <h2>Flujo de caja año por año</h2>
+      <div class="tbl-wrap"><table class="data" id="flow"></table></div>
+      <p class="note" id="flowNote"></p>
+    </section>
+
+    <section class="block">
+      <h2>Sensibilidad: años para recuperar la inversión</h2>
+      <p class="note">Según el precio del litro (filas) y los litros por vaca al día (columnas). El recuadro marca su situación actual.</p>
+      <div class="tbl-wrap"><table class="data sens" id="sens"></table></div>
+      <p class="note"><span class="dot g"></span>Hasta 4 años <span class="dot y ml"></span>De 4 a 8 años <span class="dot r ml"></span>Más de 8 años o no se recupera</p>
+    </section>
+
+    <section class="block">
+      <h2>Situación actual sin automatizar</h2>
+      <div class="tbl-wrap"><table class="data" id="base"></table></div>
+    </section>
+
+    <section class="block">
+      <h2>¿Qué beneficios aplican según el nivel?</h2>
+      <div class="lvl-guide" id="lvlGuide"></div>
+    </section>
+
+    <section class="block print-params">
+      <h2>Parámetros usados</h2>
+      <div class="tbl-wrap"><table class="data" id="paramsPrint"></table></div>
+    </section>
+
+    <section class="block method">
+      <h2>Cómo calcula</h2>
+      <ul>
+        <li><b>Más leche</b> = vacas en ordeño × litros por vaca × % de aumento × días de ordeño × (precio del litro − alimento extra por litro).</li>
+        <li><b>Menos mastitis</b> = vacas × puntos de reducción de la incidencia × litros perdidos por caso × precio del litro.</li>
+        <li><b>Concentrado</b> = vacas × kg menos por vaca al día × días × precio del kg. Si se da más concentrado, el valor es negativo (costo).</li>
+        <li><b>Mano de obra</b> = ordeñadores que se reducen × costo mensual (salario + prestaciones) × 12.</li>
+        <li><b>Energía y tiempo</b> = horas de ordeño × % menos de tiempo × costo de la sala por hora × días.</li>
+        <li><b>Beneficio neto anual</b> = suma de los beneficios − mantenimiento (% de la inversión al año). El último año suma el valor de rescate.</li>
+        <li><b>Recuperación simple</b> = inversión ÷ beneficio neto anual. <b>Recuperación descontada</b>: año en que el flujo descontado acumulado llega a cero.</li>
+        <li><b>Valor presente neto (VPN)</b> = −inversión + Σ flujo del año ÷ (1 + tasa)<sup>año</sup>. <b>TIR</b>: la tasa que hace el VPN igual a cero.</li>
+        <li><b>Crédito</b>: cuota fija anual (sistema francés) = monto × tasa ÷ (1 − (1 + tasa)<sup>−plazo</sup>). El flujo con crédito resta la cuota y el año 0 solo lleva la parte que pone la finca.</li>
+        <li><b>Semáforo</b>: verde si se recupera en 4 años o menos con VPN positivo; amarillo si se recupera dentro de 8 años y de la vida útil con VPN positivo; rojo en los demás casos.</li>
+        <li>Valores antes de impuestos y a precios constantes de hoy. No incluye la depreciación contable, que no es salida de caja.</li>
+      </ul>
+    </section>
+  </section>
+  </div>
+</div>
+
+<section class="privacy" aria-labelledby="priv-h">
+  <h2 id="priv-h"><span aria-hidden="true">🔒</span> Sus datos son privados</h2>
+  <ul>
+    <li>Todos los cálculos se hacen <b>en su celular o computador</b>. Los datos de su finca <b>no se envían a internet</b> y Datavet no los recibe ni los guarda.</li>
+    <li>Los archivos PDF y Excel se crean en su equipo y se descargan directamente a él.</li>
+    <li>La página recuerda sus últimos datos <b>solo en este dispositivo</b>, para que no los pierda si la cierra. Puede borrarlos cuando quiera.</li>
+    <li>No se piden datos personales. El nombre de la finca es opcional y solo aparece en sus descargas.</li>
+    <li>Para saber cuántas personas usan la calculadora, se cuentan de forma <b>anónima</b> las visitas y las descargas de PDF y Excel (con GoatCounter, sin <i>cookies</i>). Ese conteo <b>no incluye ningún dato de la finca</b> ni datos personales.</li>
+  </ul>
+  <button type="button" class="btn ghost" id="wipe">Borrar mis datos de este dispositivo</button>
+</section>
+
+<footer class="foot">
+  <img src="assets/isotipo-datavet.png" alt="" width="40" height="40">
+  <div>
+    <b>Iván Darío Cifuentes Moreno</b> — Médico veterinario · Magíster en Gestión de Negocios Ganaderos · Consultor en analítica de datos e inteligencia de negocios<br>
+    <b>Datavet</b> — «Analizar para innovar, innovar para evolucionar» · Medellín, Colombia<br>
+    <a href="mailto:ivan.cifuentes@datavet.info">ivan.cifuentes@datavet.info</a> · <a href="mailto:idacimo@gmail.com">idacimo@gmail.com</a> · <a href="https://wa.me/573155010037">WhatsApp (+57) 315 501 0037</a> · <a href="https://www.linkedin.com/in/idacimo">LinkedIn: idacimo</a>
+  </div>
+</footer>
+
+<script src="js/model.js"></script>
+<script src="js/app.js"></script>
+<script src="js/export-common.js" defer></script>
+<script src="js/export-xlsx.js" defer></script>
+<script src="js/export-pdf.js" defer></script>
+</body>
+</html>

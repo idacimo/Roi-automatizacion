@@ -1,0 +1,22 @@
+{
+  "name": "roi-automatizacion-datavet",
+  "version": "5.0.0",
+  "private": true,
+  "description": "Retorno de la inversión en automatización del ordeño | Datavet",
+  "scripts": {
+    "vendor": "node scripts/vendor.mjs",
+    "serve": "http-server -p 8080 -c-1 .",
+    "test": "node --test \"tests/unit/*.test.mjs\"",
+    "test:e2e": "playwright test"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@expo-google-fonts/jost": "^0.4.2",
+    "@fontsource/jost": "^5.3.0",
+    "@playwright/test": "^1.56.1",
+    "exceljs": "^4.4.0",
+    "http-server": "^14.1.1",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4"
+  }
+}
