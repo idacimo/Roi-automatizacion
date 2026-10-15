@@ -105,7 +105,7 @@ async function exportXlsx(rep, fileName, loadScript){
         wsP.getRow(row).height = 22; row++; continue;
       }
       const a = wsP.getCell(row, 1), v = wsP.getCell(row, 2), u = wsP.getCell(row, 3), h = wsP.getCell(row, 4);
-      a.value = R.l; v.value = S[R.k]; u.value = R.t === 'pct' ? '' : R.u; h.value = R.h || '';
+      a.value = R.l; v.value = R.k === 'cmarg' && S.cmargAuto !== false ? fx('p_pconc*p_conc/p_lts', P.cmarg) : S[R.k]; u.value = R.t === 'pct' ? '' : R.u; h.value = (R.h || '') + (R.k === 'cmarg' && S.cmargAuto !== false ? ' Ahora es una fórmula; puede reemplazarla por un valor.' : '');
       style(a); style(u, {color:MUTED, align:'left'}); style(h, {color:MUTED, align:'left', size:9});
       style(v, {fmt:FMT[R.t] || F.d1, bold:true, bg:INPUT});
       v.border = {top:thin(INPUT_B), bottom:thin(INPUT_B), left:thin(INPUT_B), right:thin(INPUT_B)};

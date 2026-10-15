@@ -27,12 +27,12 @@ const LEVEL_GUIDE = {
 const DEF = {
   finca:'', nivel:'basico',
   /* operación actual */
-  vacas:200, lts:18, precio:1800, conc:5, pconc:1200, ord:3, sal:2200000, mast:0.18, lmast:180,
+  vacas:200, lts:18, precio:1800, conc:5, pconc:1900, ord:3, sal:2200000, mast:0.18, lmast:180,
   horas:4, celec:12000, dias:365,
   /* inversión */
   inv:80e6, vida:10, tasa:0.12, mant:0.02, resid:0,
   /* beneficios esperados */
-  reduc:0.15, bprod:0.03, cmarg:0, dconc:0, bord:0, bmast:0.03,
+  reduc:0.15, bprod:0.03, cmarg:0, cmargAuto:true, dconc:0, bord:0, bmast:0.03,
   /* crédito (opcional) */
   fpct:0, ftasa:0.15, fplazo:5
 };
@@ -61,7 +61,7 @@ const ROWS = [
   {g:'Beneficios esperados con la automatización'},
   {k:'reduc', l:'Menos tiempo de ordeño', u:'%', t:'pct', min:0, max:0.9},
   {k:'bprod', l:'Más leche por vaca', u:'%', t:'pct', min:0, max:1},
-  {k:'cmarg', l:'Alimento extra por litro adicional', u:'$/L', t:'money', min:0, max:20000, h:'Lo que cuesta alimentar la leche extra. Con 0, la leche extra se valora a precio completo.'},
+  {k:'cmarg', l:'Alimento extra por litro adicional', u:'$/L', t:'money', min:0, max:20000, h:'Lo que cuesta alimentar la leche extra. Automático: el costo de concentrado por litro de hoy (precio del kg × kg por vaca ÷ litros por vaca).'},
   {k:'dconc', l:'Menos concentrado por vaca al día', u:'kg', t:'d1', min:-10, max:20, h:'Negativo si da más concentrado.'},
   {k:'bord', l:'Ordeñadores que se pueden reducir', u:'personas', t:'int', min:0, max:100},
   {k:'bmast', l:'Menos vacas con mastitis', u:'puntos %', t:'pct', min:0, max:1},
@@ -119,11 +119,16 @@ function crossing(cum){
   return cum[0] >= 0 ? 0 : null;
 }
 
+/* Alimento extra por litro adicional: automático = costo de concentrado por litro de hoy */
+const autoCmarg = P => P.lts > 0 ? P.pconc * P.conc / P.lts : 0;
+const effCmarg = P => P.cmargAuto === false ? P.cmarg : autoCmarg(P);
+
 /* ---------- cálculo principal ---------- */
 function compute(p, scale = 1){
   const P = {...DEF, ...p};
   const {vacas, lts, precio, conc, pconc, ord, sal, mast, lmast, horas, celec, dias, inv, vida, tasa, mant, resid,
-         reduc, bprod, cmarg, dconc, bord, bmast, fpct, ftasa, fplazo} = P;
+         reduc, bprod, dconc, bord, bmast, fpct, ftasa, fplazo} = P;
+  const cmarg = effCmarg(P);
 
   /* Situación actual (sin automatizar) */
   const base = {
@@ -185,7 +190,7 @@ function compute(p, scale = 1){
   if (pbSimple != null && van > 0 && pbSimple <= PB_OK) sem = 'g';
   else if (pbSimple != null && van > 0 && pbSimple <= Math.min(PB_WARN, vida)) sem = 'y';
 
-  return {P, base, ben, ltsNew, concNew, fce, years, flows, van, tir, pbSimple, pbDesc, pbCaja, roi,
+  return {P:{...P, cmarg}, base, ben, ltsNew, concNew, fce, years, flows, van, tir, pbSimple, pbDesc, pbCaja, roi,
           porLitro, porVaca, litrosAno, loan, cuota, minCaja, sem, cumArr, dcumArr, ccumArr};
 }
 
@@ -225,15 +230,15 @@ function validate(p){
   if (P.dconc > P.conc) errs.push('No se puede reducir más concentrado del que se da hoy.');
   if (P.bord > P.ord) warns.push(`Se reducen ${P.bord} ordeñadores pero hoy hay ${P.ord}: se cuentan solo ${P.ord}.`);
   if (P.bmast > P.mast) warns.push('La reducción de mastitis es mayor que la mastitis actual: se cuenta solo hasta la actual.');
-  if (P.bprod > 0 && P.cmarg === 0 && P.lts > 0) warns.push(`La leche extra se valora a precio completo, sin costo de alimento. Para ser conservador, escriba en «Alimento extra por litro adicional» el costo de concentrado por litro de hoy: ${money(Math.round(P.pconc * P.conc / P.lts))}.`);
-  if (P.cmarg >= P.precio && P.bprod > 0) warns.push('El alimento extra por litro es igual o mayor al precio del litro: producir más no deja ganancia.');
+  if (P.bprod > 0 && P.cmargAuto === false && P.cmarg === 0 && P.lts > 0) warns.push(`La leche extra se valora a precio completo, sin costo de alimento. Para ser conservador, escriba en «Alimento extra por litro adicional» el costo de concentrado por litro de hoy: ${money(Math.round(P.pconc * P.conc / P.lts))}.`);
+  if (effCmarg(P) >= P.precio && P.bprod > 0) warns.push('El alimento extra por litro es igual o mayor al precio del litro: producir más no deja ganancia.');
   if (P.bprod > 0.15) warns.push('Un aumento de leche mayor al 15 % es poco común solo por automatizar el ordeño. Verifíquelo.');
   if (P.fpct > 0 && P.fplazo > P.vida) warns.push('El plazo del crédito es mayor que la vida útil del equipo.');
   return {errs, warns};
 }
 
 const API = {LEVELS, LEVEL_GUIDE, DEF, ROWS, PB_OK, PB_WARN, SCEN, nf, money, mill, pct, yrs, parse, pmt, npv, irr, crossing,
-             compute, scenarios, sensitivity, verdict, validate};
+             compute, scenarios, sensitivity, verdict, validate, autoCmarg, effCmarg};
 if (typeof module !== 'undefined' && module.exports) module.exports = API;
 else root.RM = API;
 })(typeof window !== 'undefined' ? window : globalThis);

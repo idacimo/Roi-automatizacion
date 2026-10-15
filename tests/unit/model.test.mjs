@@ -8,7 +8,7 @@ const near = (a, b, tol = 1) => assert.ok(Math.abs(a - b) <= tol, `${a} ≠ ${b}
 
 test('reproduce la versión 4 con 305 días y sin mantenimiento', () => {
   /* Escenario «Inversión baja» de la v4: beneficio total $63,86 M */
-  const r = M.compute({dias:305, mant:0, conc:5, dconc:0});
+  const r = M.compute({dias:305, mant:0, conc:5, dconc:0, cmargAuto:false, cmarg:0});
   near(r.ben.elec, 2628000 * 305 / 365);              // la v4 usaba 365 días solo para la electricidad
   near(r.ben.prod, 59292000);
   near(r.ben.mast, 1944000);
@@ -22,7 +22,7 @@ test('reproduce la versión 4 con 305 días y sin mantenimiento', () => {
 test('beneficios con los valores por defecto (365 días, mantenimiento 2 %)', () => {
   const r = M.compute({});
   near(r.ben.elec, 4 * 0.15 * 12000 * 365);
-  near(r.ben.prod, 200 * 18 * 0.03 * 365 * 1800);
+  near(r.ben.prod, 200 * 18 * 0.03 * 365 * (1800 - 1900 * 5 / 18));
   near(r.ben.mast, 200 * 0.03 * 180 * 1800);
   near(r.ben.mant, 80e6 * 0.02);
   near(r.ben.neto, r.ben.bruto - 1.6e6);
@@ -64,10 +64,13 @@ test('no paga: beneficios menores que el mantenimiento', () => {
 });
 
 test('alimento extra por litro descuenta el valor de la leche adicional', () => {
-  const a = M.compute({}), b = M.compute({cmarg:333});
+  const a = M.compute({cmargAuto:false, cmarg:0}), b = M.compute({cmargAuto:false, cmarg:333});
   near(a.ben.prod - b.ben.prod, 200 * 18 * 0.03 * 365 * 333);
-  assert.ok(M.validate({}).warns.some(w => w.includes('precio completo')));
-  assert.ok(!M.validate({cmarg:333}).warns.some(w => w.includes('precio completo')));
+  assert.ok(M.validate({cmargAuto:false, cmarg:0}).warns.some(w => w.includes('precio completo')));
+  assert.ok(!M.validate({}).warns.some(w => w.includes('precio completo')));
+  /* automático: costo de concentrado por litro de hoy */
+  near(M.compute({}).P.cmarg, 1900 * 5 / 18, 1e-9);
+  near(M.compute({lts:25}).P.cmarg, 1900 * 5 / 25, 1e-9);
 });
 
 test('no se reducen más ordeñadores ni más mastitis de los que hay', () => {

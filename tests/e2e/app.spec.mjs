@@ -16,7 +16,7 @@ test.afterEach(async ({ page }) => { expect(page.errors).toEqual([]); });
 
 const noHScroll = async page => expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 
-test('modo rápido: tres pasos, resultados y descargas', async ({ page }) => {
+test('modo básico: tres pasos, resultados y descargas', async ({ page }) => {
   await page.fill('#s-finca', 'La Esperanza');
   await page.fill('#s-vacas', '120');
   await page.click('.step[data-step="1"] [data-go="2"]');
@@ -60,7 +60,7 @@ test('modo rápido: tres pasos, resultados y descargas', async ({ page }) => {
   expect(pages).toBeLessThanOrEqual(4);
 });
 
-test('modo rápido: datos inválidos no dejan avanzar', async ({ page }) => {
+test('modo básico: datos inválidos no dejan avanzar', async ({ page }) => {
   await page.fill('#s-lts', '0');
   await expect(page.locator('#s-lts')).toHaveClass(/bad/);
   await page.click('.step[data-step="1"] [data-go="2"]');
@@ -100,4 +100,25 @@ test('guarda los datos en el dispositivo y los borra', async ({ page }) => {
   page.once('dialog', d => d.accept());
   await page.click('#wipe');
   await expect(page.locator('#s-vacas')).toHaveValue('200');
+});
+
+test('alimento extra por litro: automático, manual y de vuelta a automático', async ({ page }) => {
+  await page.click('.modes [data-mode="full"]');
+  await expect(page.locator('#p-cmarg')).toHaveValue('528');          // 1.900 × 5 ÷ 18
+  await expect(page.locator('#cmargAuto')).toBeHidden();
+  await page.fill('#p-lts', '25');
+  await expect(page.locator('#p-cmarg')).toHaveValue('380');          // 1.900 × 5 ÷ 25
+  await page.fill('#p-cmarg', '0');
+  await expect(page.locator('#cmargAuto')).toBeVisible();
+  await expect(page.locator('#errors .alert.warn')).toContainText('precio completo');
+  await page.click('#cmargAuto');
+  await expect(page.locator('#p-cmarg')).toHaveValue('380');
+  await expect(page.locator('#cmargAuto')).toBeHidden();
+  const [dx] = await Promise.all([page.waitForEvent('download'), page.click('.full-bar [data-action="xlsx"]')]);
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.load(await readFile(await dx.path()));
+  let f = null;
+  wb.getWorksheet('Parámetros').eachRow(r => r.eachCell(c => { if (c.value && c.value.formula && c.value.formula.includes('p_pconc')) f = c.value; }));
+  expect(f.formula).toBe('p_pconc*p_conc/p_lts');
+  expect(Math.round(f.result)).toBe(380);
 });

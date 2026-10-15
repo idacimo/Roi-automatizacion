@@ -9,12 +9,10 @@ ivan.cifuentes@datavet.info · idacimo@gmail.com · WhatsApp (+57) 315 501 0037
 
 ## Para quién
 
-| Perfil | Modo | Qué ve |
+| Modo | Para quién | Qué ve |
 |---|---|---|
-| **Productor** | Rápido (por defecto, pensado para el celular) | 3 pasos: su finca, el equipo (nivel y precio), resultados. Años para recuperar la inversión, cuánto deja al año y por litro, semáforo, de dónde sale la plata, gráfica y escenarios. |
-| **Técnico o asesor** | Completo | Todos los supuestos editables: producción, mastitis, concentrado, mano de obra, energía, alimento extra por litro adicional. |
-| **Propietario** | Completo | Flujo de caja año por año, con crédito (cuota fija, intereses, saldo) y sin crédito. |
-| **Financiero** | Completo | VPN, TIR, recuperación simple y descontada, valor de rescate, mantenimiento, escenarios (60 % · 100 % · 120 %) y sensibilidad precio × litros. |
+| **Básico** (por defecto, pensado para el celular) | Productor | 3 pasos: su finca, el equipo (nivel y precio), resultados. Años para recuperar la inversión, cuánto deja al año y por litro, semáforo, de dónde sale la plata, gráfica y escenarios. |
+| **Completo** | Técnico, propietario o financiero | Todos los supuestos editables, flujo de caja con y sin crédito, VPN, TIR, recuperación simple y descontada, valor de rescate, escenarios (60 % · 100 % · 120 %) y sensibilidad precio × litros. |
 
 El enlace `…/#completo` abre directamente el modo completo.
 
@@ -48,8 +46,9 @@ El enlace `…/#completo` abre directamente el modo completo.
 | Días de producción | 305 días con vacas en ordeño (subestimaba) y 365 para concentrado y energía | Un solo parámetro, **365** por defecto, porque «vacas en ordeño» ya es el promedio del año |
 | Mantenimiento del equipo | No existía | **2 %** de la inversión al año (editable) |
 | Concentrado por nivel | Valor absoluto (4,0 o 4,5 kg) aunque la finca diera otra cantidad | **Reducción** en kg; solo el sistema completo lo reduce, como dice la guía de la herramienta |
-| Leche adicional | Valorada a precio completo | Igual por defecto, con el parámetro **alimento extra por litro adicional** y un aviso para ser conservador |
+| Leche adicional | Valorada a precio completo | Se descuenta el **alimento extra por litro adicional**, calculado automáticamente como el costo de concentrado por litro de hoy (precio del kg × kg por vaca ÷ litros por vaca); se puede reemplazar por un valor propio |
 | Indicadores | Payback, ROI, VPN | + TIR, recuperación descontada, por litro y por vaca, escenarios, valor de rescate, crédito |
+| Precio del concentrado | $1.200/kg | **$1.900/kg** por defecto |
 | Gráfica | Siempre 10 años | Según la vida útil |
 | Exportación | Imprimir la página | PDF y Excel propios, también en el celular |
 
@@ -58,7 +57,7 @@ Con 305 días y sin mantenimiento, el modelo da los mismos beneficios de producc
 ## Estructura
 
 ```
-index.html            página (modo rápido y completo)
+index.html            página (modo básico y completo)
 css/app.css           estilos (base compartida con Plan de reemplazos)
 js/model.js           modelo de cálculo (también se usa en las pruebas)
 js/app.js             interfaz
@@ -76,7 +75,7 @@ tests/                pruebas del modelo (Node) y de punta a punta (Playwright: 
 npm install
 npm run serve        # http://localhost:8080
 npm test             # modelo de cálculo
-npm run test:e2e     # navegador: modo rápido y completo, descargas de PDF y Excel
+npm run test:e2e     # navegador: modo básico y completo, descargas de PDF y Excel
 ```
 
 ## Publicar en GitHub Pages

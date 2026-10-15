@@ -29,15 +29,15 @@
     <h1>Retorno de la automatización del ordeño</h1>
     <p>¿En cuánto tiempo se paga automatizar el ordeño de su finca?</p>
   </div>
-  <div class="modes" role="group" aria-label="Tipo de análisis">
-    <button type="button" data-mode="simple" aria-pressed="true">Rápido</button>
+  <div class="modes" role="group" aria-label="Tipo de análisis: básico o completo">
+    <button type="button" data-mode="simple" aria-pressed="true">Básico</button>
     <button type="button" data-mode="full" aria-pressed="false">Completo</button>
   </div>
 </header>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<!-- ===================== MODO RÁPIDO ===================== -->
+<!-- ===================== MODO BÁSICO ===================== -->
 <main id="contenido" class="simple" data-view="simple">
   <ol class="steps" aria-label="Pasos">
     <li data-step="1" aria-current="step"><span>1</span>Su finca</li>
@@ -175,16 +175,6 @@
     <p class="sub" id="sub"></p>
     <div id="errors"></div>
     <div class="kgrid" id="kgrid"></div>
-
-    <section class="block">
-      <h2>¿Para quién es cada indicador?</h2>
-      <div class="who">
-        <div><b>Productor</b>Años para recuperar la inversión y cuánto deja al año, también por litro de leche.</div>
-        <div><b>Técnico o asesor</b>De dónde sale cada peso: producción, mastitis, concentrado, mano de obra y energía.</div>
-        <div><b>Propietario</b>Flujo de caja año por año, con y sin crédito.</div>
-        <div><b>Financiero</b>Valor presente neto, TIR, recuperación descontada, escenarios y sensibilidad.</div>
-      </div>
-    </section>
 
     <section class="block">
       <h2>¿De dónde sale el beneficio?</h2>

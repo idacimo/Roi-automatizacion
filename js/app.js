@@ -1,6 +1,6 @@
-/* Retorno de la automatización del ordeño | Datavet — interfaz (modo rápido y modo completo) */
+/* Retorno de la automatización del ordeño | Datavet — interfaz (modo básico y modo completo) */
 'use strict';
-const {LEVELS, LEVEL_GUIDE, DEF, ROWS, SCEN, nf, money, mill, pct, yrs, parse, compute, scenarios, sensitivity, verdict, validate} = window.RM;
+const {LEVELS, LEVEL_GUIDE, DEF, ROWS, SCEN, nf, money, mill, pct, yrs, parse, compute, scenarios, sensitivity, verdict, validate, effCmarg} = window.RM;
 
 const STORE = 'datavet-roi-ordeno-v5';
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -131,7 +131,7 @@ function barsHtml(r){
 }
 
 /* ====================================================================== */
-/* Modo rápido                                                            */
+/* Modo básico                                                            */
 /* ====================================================================== */
 const SIMPLE_KEYS = ['vacas', 'lts', 'precio', 'horas', 'ord'];
 function buildSimple(){
@@ -187,7 +187,7 @@ function renderSimple(r){
   h += `<div class="card"><h3>Lo que la calculadora supuso</h3><ul class="lights">` +
     [['Más leche por vaca', pct(P.bprod, 1)], ['Menos vacas con mastitis', nf(P.bmast * 100, 1) + ' puntos'], ['Menos tiempo de ordeño', pct(P.reduc)],
      ['Ordeñadores que se reducen', nf(Math.min(P.bord, P.ord), 0)], ['Concentrado por vaca', P.dconc ? '−' + nf(P.dconc, 1) + ' kg al día' : 'Sin cambio'],
-     ['Mantenimiento al año', pct(P.mant, 1) + ' de la inversión'], ['Precio del concentrado', money(P.pconc) + '/kg'], ['Costo por ordeñador', money(P.sal) + '/mes']]
+     ['Alimento para la leche extra', money(P.cmarg) + ' por litro'], ['Mantenimiento al año', pct(P.mant, 1) + ' de la inversión'], ['Precio del concentrado', money(P.pconc) + '/kg'], ['Costo por ordeñador', money(P.sal) + '/mes']]
       .map(([a, b]) => `<li><span class="lt"><b>${a}</b></span><span class="lv">${b}</span></li>`).join('') +
     `</ul><p class="hint" style="margin:10px 0 0">Si alguno no se parece a su finca, ajústelo en el <b>análisis completo</b>.</p></div>`;
   $('#s-result').innerHTML = h;
@@ -201,13 +201,22 @@ function buildFull(){
   $('#params tbody').innerHTML = ROWS.map(r => {
     if (r.g) return `<tr class="grp"><th colspan="3" scope="colgroup">${r.g}</th></tr>`;
     return `<tr><td><label for="p-${r.k}">${r.l}</label></td><td><input id="p-${r.k}" inputmode="decimal" autocomplete="off" data-k="${r.k}"></td><td class="unit">${r.u}</td></tr>` +
-      (r.h ? `<tr class="hint"><td colspan="3">${r.h}</td></tr>` : '');
+      (r.h ? `<tr class="hint"><td colspan="3">${r.h}${r.k === 'cmarg' ? ' <button type="button" class="btn line" id="cmargAuto">Usar automático</button>' : ''}</td></tr>` : '');
   }).join('');
 }
 function fillFull(){
   $('#finca').value = S.finca;
   $('#nivel').value = S.nivel;
-  $$('#params input[data-k]').forEach(el => { el.value = toField(el.dataset.k, S[el.dataset.k]); el.classList.remove('bad'); });
+  $$('#params input[data-k]').forEach(el => { el.value = toField(el.dataset.k, el.dataset.k === 'cmarg' ? Math.round(effCmarg(S)) : S[el.dataset.k]); el.classList.remove('bad'); });
+  syncCmarg();
+}
+
+function syncCmarg(){
+  const el = $('#p-cmarg'), b = $('#cmargAuto');
+  if (!el || !b) return;
+  if (S.cmargAuto !== false && document.activeElement !== el) el.value = toField('cmarg', Math.round(effCmarg(S)));
+  b.hidden = S.cmargAuto !== false;
+  el.title = S.cmargAuto !== false ? 'Automático: costo de concentrado por litro de hoy' : '';
 }
 
 function fechaTxt(){
@@ -236,6 +245,7 @@ function scenRows(r){
 
 function renderFull(r){
   const P = r.P, v = verdict(r), val = validate(S);
+  syncCmarg();
   $('#errors').innerHTML = val.errs.map(e => `<div class="alert">${esc(e)}</div>`).join('') + val.warns.map(e => `<div class="alert warn">${esc(e)}</div>`).join('');
   $('#printMeta').textContent = [S.finca || 'Finca sin nombre', fechaTxt(), LEVELS[S.nivel].name].filter(Boolean).join(' · ');
   if (val.errs.length) { $('#lead').textContent = 'Hay datos por corregir.'; $('#sub').textContent = ''; return; }
@@ -288,9 +298,9 @@ function baseRows(r){
 }
 function paramRows(){
   return [['Nivel de automatización', LEVELS[S.nivel].name], ...ROWS.filter(r => r.k).map(r => {
-    const v = S[r.k], t = r.t;
+    const v = r.k === 'cmarg' ? effCmarg(S) : S[r.k], t = r.t;
     const txt = t === 'pct' ? pct(v, 1) : t === 'money' ? money(v) : nf(v, t === 'd1' ? 1 : 0);
-    return [r.l, txt + (t === 'pct' || t === 'money' ? '' : ' ' + r.u)];
+    return [r.l, txt + (t === 'pct' || t === 'money' ? '' : ' ' + r.u) + (r.k === 'cmarg' && S.cmargAuto !== false ? ' (automático)' : '')];
   })];
 }
 
@@ -371,7 +381,7 @@ function bind(){
     render();
   }));
 
-  // modo rápido
+  // modo básico
   $$('#s-nivel .level').forEach(b => b.addEventListener('click', () => {
     applyLevel(b.dataset.nivel); fillSimple(); render();
   }));
@@ -408,11 +418,15 @@ function bind(){
     const v = fromField(k, el.value), R = ROW[k];
     const ok = isFinite(v) && v >= R.min && v <= R.max;
     el.classList.toggle('bad', !ok);
-    if (ok) { S[k] = v; render(); }
+    if (ok) { S[k] = v; if (k === 'cmarg') S.cmargAuto = false; render(); }
   });
   $('#params').addEventListener('focusout', e => {
     const el = e.target, k = el.dataset.k;
-    if (k && !el.classList.contains('bad')) el.value = toField(k, S[k]);
+    if (k && !el.classList.contains('bad')) el.value = toField(k, k === 'cmarg' ? (S.cmargAuto === false ? S.cmarg : Math.round(effCmarg(S))) : S[k]);
+  });
+  $('#params').addEventListener('click', e => {
+    if (e.target.id !== 'cmargAuto') return;
+    S.cmargAuto = true; syncCmarg(); render(); toast('Alimento extra por litro: automático.');
   });
   $('#nivel').addEventListener('change', e => { applyLevel(e.target.value); fillFull(); render(); toast('Se cargaron la inversión y los beneficios típicos del nivel.'); });
   $('#reset').addEventListener('click', () => { const f = S.finca; S = clone(DEF); S.finca = f; fillFull(); render(); toast('Se restablecieron los valores de ejemplo.'); });
